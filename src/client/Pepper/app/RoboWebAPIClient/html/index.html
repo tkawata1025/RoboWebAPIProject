@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>RoboWebAPI</title>
+    <style>
+    button {
+      height: 130%;
+      width: 100%;
+      border-radius: 50px;
+      border:10px solid #cfdcec;
+      
+      background: #4679BD; 
+      box-shadow: 0 0 3px gray;
+      text-align:center;
+      color:#e2eaf3;
+      font-size:1.2em;
+      font-weight:bold;
+      text-decoration:none;
+    }
+    </style>
+
+    <script src="/libs/qimessaging/1.0/qimessaging.js"></script>
+    <script>
+      var session = new QiSession();
+      
+      function valueEndpointURLHandler(value) {
+        session.service("ALMemory").done(function (ALMemory) {
+          ALMemory.getData("RoboWebAPI/endpointURL").done(function(value) {
+            document.getElementById("server_address").value = value; 
+          });
+        });
+      }
+
+      function valueClient_tokenHandler(value) {
+        session.service("ALMemory").done(function (ALMemory) {
+          ALMemory.getData("RoboWebAPI/client_token").done(function(value) {
+            document.getElementById("client_token").innerHTML = value; 
+          });
+        });
+      }
+
+      function messageHandler(value) {
+        console.log(value);
+        document.getElementById("message").innerHTML = value; 
+      }
+
+      function showButtonHandler(value) {
+        if (value == "show")
+        {
+            console.log("show buttons");
+            document.getElementById("button1").style.visibility = "visible"; 
+            document.getElementById("button2").style.visibility = "visible"; 
+        } 
+        else
+        {
+            console.log("hide buttons");
+            document.getElementById("button1").style.visibility = "hidden"; 
+            document.getElementById("button2").style.visibility = "hidden"; 
+        }
+      }
+      
+      function init() {
+        session.service("ALMemory").done(function (ALMemory) {
+          ALMemory.getData("RoboWebAPI/endpointURL").done(function(value) {
+            document.getElementById("server_address").value = value; 
+          });
+
+          ALMemory.getData("RoboWebAPI/client_token").done(function(value) {
+            document.getElementById("client_token").innerHTML = value; 
+          });
+
+          ALMemory.subscriber("RoboWebAPI/endpointURL").done(function(subscriber) {
+            subscriber.signal.connect(valueEndpointURLHandler);
+          });
+
+          ALMemory.subscriber("RoboWebAPI/client_token").done(function(subscriber) {
+            subscriber.signal.connect(valueClient_tokenHandler);
+          });
+
+          ALMemory.subscriber("RoboWebAPI/tablet_message").done(function(subscriber) {
+            subscriber.signal.connect(messageHandler);
+          });
+
+          ALMemory.subscriber("RoboWebAPI/tablet_showButton").done(function(subscriber) {
+            subscriber.signal.connect(showButtonHandler);
+          });
+
+        });
+      }
+
+      function connect() {
+        session.service("ALMemory").done(function (ALMemory) {
+          ALMemory.raiseEvent("RoboWebAPI/tablet_ui_connect", document.getElementById("server_address").value);
+        });
+      }
+
+      function reset() {
+        session.service("ALMemory").done(function (ALMemory) {
+          ALMemory.raiseEvent("RoboWebAPI/tablet_ui_reset", "1");
+        });
+      }
+    </script>
+  </head>
+  <body onLoad="init();">
+    <div style="font-size: 120px;background: #4679BD;font-weight:bold;color:#e2eaf3;border-color:#cfdcec;border-style :solid;border-width: 0 0 10px;" >
+      RoboWebAPI
+    </div>
+    <div style="font-size: 64px;" align=center>
+      <table border=0 >
+        <tr><td>&nbsp; </td></tr>
+        <tr>
+          <td>サーバー</td><td>：</td><td><input id="server_address" type="text" style="font-size: 64px" value="http://" ></td> 
+        </tr>
+          <td>クライアントトークン</td><td>：</td><td><span id="client_token">未取得</span></td>
+        </tr>
+        <tr><td colspan="3"><span id="message" style="color:#e20000;">&nbsp;</span></td></tr>
+        <tr><td>&nbsp; </td></tr>
+        <tr>
+          <td colspan="3" align="center"><button style="font-size: 100px;width:1200px" type="button" id="button1" onclick="connect();">接続</button></td>
+        </tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr>
+          <td colspan="3" align="center"><button style="font-size: 100px;width:1200px" type="button" id="button2" onclick="reset();">接続情報リセット</button></td>
+        </tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr>
+          <td colspan="3" align="right" ><span style="font-size: 24px">Powered by RoboWebAPI project</span></td>
+        </tr>
+      </table>
+
+    </div>
+  </body>
+</html>
